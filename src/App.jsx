@@ -119,7 +119,7 @@ function App() {
                 </>
                 :
                 <>
-                  <input type="checkbox" id={`checkbox-${todo.id}`} className="mr-2 h-5 w-6" onChange={() => toggleTodo(todo.id)} />
+                  <input type="checkbox" checked={todo?.completed} id={`checkbox-${todo.id}`} className="mr-2 h-5 w-6" onChange={() => toggleTodo(todo.id)} />
                   <label
                     htmlFor={`checkbox-${todo.id}`}
                     className={todo.completed ? "cursor-pointer w-96 line-through text-green-500" : "cursor-pointer w-96"}
