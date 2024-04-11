@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
@@ -8,10 +8,13 @@ import { faRectangleXmark } from '@fortawesome/free-solid-svg-icons';
 
 function App() {
 
-  const [todos, setTodos] = useState([]);
+  const [todos, setTodos] = useState(() => {
+    return JSON.parse(localStorage.getItem('todos')) || []
+  });
   const [todo, setTodo] = useState("");
   const [editId, setEditId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
+  const [showPopup, setshowPopup] = useState(false);
 
   const addTodo = () => {
     if (todo) {
@@ -44,7 +47,7 @@ function App() {
 
   const saveEdit = (id) => {
     const newTodos = todos.map(todo => {
-      if (todo.id == id) return { ...todo, title: editTitle};
+      if (todo.id == id) return { ...todo, title: editTitle };
       return todo;
     })
     setTodos(newTodos);
@@ -57,25 +60,48 @@ function App() {
     setEditTitle("");
   }
 
+  const handleClearAll = () => {
+    setshowPopup(true);
+  }
+
+  const handleNo = () => {
+    setshowPopup(false);
+  }
+  const handleYes = () => {
+    setTodos([]);
+    setshowPopup(false);
+  }
+
+  useEffect(() => {
+    localStorage.setItem('todos', JSON.stringify(todos));
+  }, [todos]);
+
+
   return (
     <>
       <div className='font-sans flex justify-center items-center flex-col'>
-        <h1 className='my-6  text-3xl'>Not Your Ordinary Todo App</h1>
+        <h1 className='my-6  text-3xl'>ToDo - App</h1>
         <hr className="border-gray-400 w-full" />
-        <div className='space-x-4 mt-6'>
+        <div className={showPopup ? 'space-x-4 mt-6 pointer-events-none' : 'space-x-4 mt-6'}>
           <input
             type='text'
             placeholder='Enter todo'
-            className=' text-base rounded border-2 border-white text-black h-10 bg-gray-400 placeholder-white'
+            className=' text-base rounded border-2 border-white text-black h-8 bg-gray-400 placeholder-white'
             value={todo}
             onChange={e => setTodo(e.target.value)}
             onKeyDown={handleKeyDown}
           />
-          <button className='bg-green-600 w-20 rounded border-2 h-7' onClick={addTodo}>Add</button>
+          <button className='bg-green-600 w-20 rounded border-2 h-8' onClick={addTodo}>Add</button>
+          {todos?.length > 0 && <button className='bg-red-600 w-20 rounded border-2 h-8' onClick={handleClearAll}>Clear all</button>}
         </div>
-        <div className='my-10 '>
+        {showPopup && <div className='border w-5/12 h-40 flex justify-center items-center rounded-lg absolute bg-black top-1/3'>
+          <h1>Are you sure you want to clear all todos?</h1>
+          <button className='mx-10 border-2 rounded border-white  bg-green-600 w-20' onClick={handleNo}>No</button>
+          <button className='border-2 rounded border-white  bg-red-600 w-20' onClick={handleYes}>Yes</button>
+        </div>}
+        <div className={showPopup ? 'my-10 pointer-events-none' : 'my-10'}>
           {todos.map((todo) => (
-            <div key={todo.id} className='rounded border-2 w-auto my-2 px-4 h-16 flex items-center bg-neutral-900'>
+            <div key={todo.id} className='rounded border-2 w-auto my-2 px-4 h-16 flex items-center bg-neutral-900 hover:border-2 hover:border-green-600 transition-transform hover:scale-105'>
               {editId == todo.id ?
                 <>
                   <input
